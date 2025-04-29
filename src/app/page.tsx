@@ -1,17 +1,19 @@
 // src/app/page.tsx
 import Link from "next/link";
-import { supabase } from "@/lib/supabaseClient";
-import Image from "next/image"; // Import next/image
+import { supabase } from "@/lib/supabaseClient"; // Import Supabase client
 
+// Define the type for a Post
 interface Post {
   id: number;
   title: string;
   slug: string;
   created_at: string;
-  image_url?: string | null;
+  image_url?: string | null; // Optional image URL
 }
 
+// Fetch posts data on the server
 async function getPosts(): Promise<Post[]> {
+  // Select specific columns, order by creation date descending
   const { data, error } = await supabase
     .from("posts")
     .select("id, title, slug, created_at, image_url")
@@ -19,11 +21,16 @@ async function getPosts(): Promise<Post[]> {
 
   if (error) {
     console.error("Error fetching posts:", error);
+    // In a real app, you might want to handle this more gracefully
+    // e.g., return empty array or throw an error to be caught by an error boundary
     return [];
   }
+
+  // Return data or empty array if null/undefined
   return data || [];
 }
 
+// The Page component is async because we fetch data directly
 export default async function HomePage() {
   const posts = await getPosts();
 
@@ -35,42 +42,18 @@ export default async function HomePage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {posts.map((post) => (
-            <Link
-              href={`/blog/${post.slug}`}
-              key={post.id}
-              className="block border rounded-lg overflow-hidden shadow hover:shadow-lg transition-shadow duration-200 h-full group"
-            >
-              {/* Container div for layout */}
-              <div className="flex flex-col h-full">
-                {/* Use next/image component - ADDRESSING THE WARNING */}
-                {post.image_url ? (
-                  <div className="relative w-full h-48">
-                    {" "}
-                    {/* Fixed height container */}
-                    <Image
-                      src={post.image_url}
-                      alt={`Image for ${post.title}`}
-                      fill // Use fill to cover the container
-                      style={{ objectFit: "cover" }} // Ensure image covers the area
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" // Help browser choose correct size
-                      // You might need to configure remotePatterns in next.config.mjs if using external URLs
-                    />
-                  </div>
-                ) : (
-                  // Optional: Placeholder if no image
-                  <div className="w-full h-48 bg-gray-200 flex items-center justify-center text-gray-400">
-                    <span>No Image</span>
-                  </div>
+            <Link href={`/blog/${post.slug}`} key={post.id}>
+              <div className="block border rounded-lg overflow-hidden shadow hover:shadow-lg transition-shadow duration-200 h-full">
+                {post.image_url && (
+                  <img
+                    src={post.image_url}
+                    alt={`Image for ${post.title}`}
+                    className="w-full h-48 object-cover" // Fixed height, object-cover
+                  />
                 )}
-                <div className="p-4 flex flex-col flex-grow">
-                  {" "}
-                  {/* Allow text content to grow */}
-                  <h2 className="text-xl font-semibold mb-2 group-hover:text-blue-700">
-                    {post.title}
-                  </h2>
-                  <p className="text-sm text-gray-500 mt-auto">
-                    {" "}
-                    {/* Push date to bottom */}
+                <div className="p-4">
+                  <h2 className="text-xl font-semibold mb-2">{post.title}</h2>
+                  <p className="text-sm text-gray-500">
                     Published on:{" "}
                     {new Date(post.created_at).toLocaleDateString()}
                   </p>

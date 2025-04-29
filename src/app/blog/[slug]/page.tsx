@@ -4,6 +4,13 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image"; // Import next/image
 
+// REMOVE THIS INTERFACE
+// interface PostPageProps {
+//   params: {
+//     slug: string;
+//   };
+// }
+
 // Define the type for a single Post with content
 interface FullPost {
   id: number;
@@ -75,27 +82,11 @@ export default async function PostPage({
       >
         &larr; Back to Blog List
       </Link>
-
       <h1 className="text-4xl font-bold mb-4">{post.title}</h1>
       <p className="text-sm text-gray-500 mb-6">
         Published on: {new Date(post.created_at).toLocaleDateString()}
       </p>
-
-      {/* Use next/image component - ADDRESSING THE WARNING */}
-      {post.image_url && (
-        <div className="relative w-full h-96 mb-6 shadow rounded-lg overflow-hidden">
-          {/* Container for layout */}
-          <Image
-            src={post.image_url}
-            alt={`Banner for ${post.title}`}
-            fill // Use fill to cover the container
-            style={{ objectFit: "cover" }} // Ensure image covers the area
-            priority // Prioritize loading if it's likely LCP
-            // You might need to configure remotePatterns in next.config.mjs if using external URLs
-          />
-        </div>
-      )}
-
+      Use next/image component - ADDRESSING THE WARNING
       {post.content ? (
         <div
           className="prose-content"
@@ -104,7 +95,6 @@ export default async function PostPage({
       ) : (
         <p>This post does not have any content yet.</p>
       )}
-
       {/* SECURITY WARNING REMAINS VALID */}
       {/* Ensure only trusted admins can insert HTML content */}
     </article>
