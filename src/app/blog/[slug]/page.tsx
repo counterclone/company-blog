@@ -86,7 +86,7 @@ export default async function PostPage({
       <p className="text-sm text-gray-500 mb-6">
         Published on: {new Date(post.created_at).toLocaleDateString()}
       </p>
-      Use next/image component - ADDRESSING THE WARNING
+
       {post.content ? (
         <div
           className="prose-content"
