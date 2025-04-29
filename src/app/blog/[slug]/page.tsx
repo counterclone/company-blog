@@ -1,17 +1,7 @@
-// src/app/blog/[slug]/page.tsx
 import { supabase } from "@/lib/supabaseClient";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-//import Image from "next/image"; // Import next/image
 
-// REMOVE THIS INTERFACE
-// interface PostPageProps {
-//   params: {
-//     slug: string;
-//   };
-// }
-
-// Define the type for a single Post with content
 interface FullPost {
   id: number;
   title: string;
@@ -21,7 +11,6 @@ interface FullPost {
   image_url?: string | null;
 }
 
-// Fetch a single post based on slug
 async function getPostBySlug(slug: string): Promise<FullPost | null> {
   const { data, error } = await supabase
     .from("posts")
@@ -37,17 +26,16 @@ async function getPostBySlug(slug: string): Promise<FullPost | null> {
     console.error("Error fetching post by slug:", error);
     throw new Error(`Failed to fetch post: ${error.message}`);
   }
+
   return data;
 }
 
 // --- METADATA ---
-// Modify the signature: Remove PostPageProps type annotation
 export async function generateMetadata({
   params,
 }: {
   params: { slug: string };
 }) {
-  // Let TS infer
   const post = await getPostBySlug(params.slug);
   if (!post) {
     return {
@@ -56,18 +44,15 @@ export async function generateMetadata({
   }
   return {
     title: `${post.title} | Indrita Fintech Blog`,
-    // description: post.content?.substring(0, 150) + '...', // Example description
   };
 }
 
 // --- PAGE COMPONENT ---
-// Modify the signature: Remove PostPageProps type annotation
-export default async function PostPage({
-  params,
-}: {
+interface PageProps {
   params: { slug: string };
-}) {
-  // Let TS infer
+}
+
+export default async function PostPage({ params }: PageProps) {
   const post = await getPostBySlug(params.slug);
 
   if (!post) {
@@ -95,8 +80,6 @@ export default async function PostPage({
       ) : (
         <p>This post does not have any content yet.</p>
       )}
-      {/* SECURITY WARNING REMAINS VALID */}
-      {/* Ensure only trusted admins can insert HTML content */}
     </article>
   );
 }
