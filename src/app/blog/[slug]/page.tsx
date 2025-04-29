@@ -2,21 +2,23 @@
 import { supabase } from "@/lib/supabaseClient";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image"; // Import next/image
 
-interface PostPageProps {
-  params: {
-    slug: string; // This comes from the folder name [slug]
-  };
-}
+// REMOVE THIS INTERFACE
+// interface PostPageProps {
+//   params: {
+//     slug: string;
+//   };
+// }
 
 // Define the type for a single Post with content
 interface FullPost {
   id: number;
   title: string;
   slug: string;
-  content?: string | null; // Content is optional
+  content?: string | null;
   created_at: string;
-  image_url?: string | null; // Optional image URL
+  image_url?: string | null;
 }
 
 // Fetch a single post based on slug
@@ -24,34 +26,28 @@ async function getPostBySlug(slug: string): Promise<FullPost | null> {
   const { data, error } = await supabase
     .from("posts")
     .select("id, title, slug, content, created_at, image_url")
-    .eq("slug", slug) // Filter by the slug
-    .single(); // Expect only one row
+    .eq("slug", slug)
+    .single();
 
   if (error) {
     if (error.code === "PGRST116") {
-      // PostgREST error code for "Requested range not satisfiable" -> means 0 rows returned
       console.log(`Post with slug "${slug}" not found.`);
-      return null; // Return null if not found
+      return null;
     }
     console.error("Error fetching post by slug:", error);
-    // Throw error for other unexpected issues
     throw new Error(`Failed to fetch post: ${error.message}`);
   }
-
   return data;
 }
 
-// Optional: Generate static paths at build time if desired (for performance)
-// export async function generateStaticParams() {
-//   const { data: posts } = await supabase.from('posts').select('slug');
-//   return posts?.map((post) => ({
-//     slug: post.slug,
-//   })) || [];
-// }
-
 // --- METADATA ---
-// Dynamically generate metadata for each post page
-export async function generateMetadata({ params }: PostPageProps) {
+// Modify the signature: Remove PostPageProps type annotation
+export async function generateMetadata({
+  params,
+}: {
+  params: { slug: string };
+}) {
+  // Let TS infer
   const post = await getPostBySlug(params.slug);
   if (!post) {
     return {
@@ -60,16 +56,20 @@ export async function generateMetadata({ params }: PostPageProps) {
   }
   return {
     title: `${post.title} | Indrita Fintech Blog`,
-    // Add description or open graph tags if needed
-    // description: post.content?.substring(0, 150) + '...',
+    // description: post.content?.substring(0, 150) + '...', // Example description
   };
 }
 
 // --- PAGE COMPONENT ---
-export default async function PostPage({ params }: PostPageProps) {
+// Modify the signature: Remove PostPageProps type annotation
+export default async function PostPage({
+  params,
+}: {
+  params: { slug: string };
+}) {
+  // Let TS infer
   const post = await getPostBySlug(params.slug);
 
-  // If post is not found, render the 404 page
   if (!post) {
     notFound();
   }
@@ -88,37 +88,33 @@ export default async function PostPage({ params }: PostPageProps) {
         Published on: {new Date(post.created_at).toLocaleDateString()}
       </p>
 
+      {/* Use next/image component - ADDRESSING THE WARNING */}
       {post.image_url && (
-        <img
-          src={post.image_url}
-          alt={`Banner for ${post.title}`}
-          className="w-full h-auto max-h-96 object-cover rounded-lg mb-6 shadow"
-        />
+        <div className="relative w-full h-96 mb-6 shadow rounded-lg overflow-hidden">
+          {" "}
+          {/* Container for layout */}
+          <Image
+            src={post.image_url}
+            alt={`Banner for ${post.title}`}
+            fill // Use fill to cover the container
+            style={{ objectFit: "cover" }} // Ensure image covers the area
+            priority // Prioritize loading if it's likely LCP
+            // You might need to configure remotePatterns in next.config.mjs if using external URLs
+          />
+        </div>
       )}
 
-      {/* Render the HTML content dangerously */}
-      {/* Apply the .prose-content class for styling defined in globals.css */}
       {post.content ? (
         <div
-          className="prose-content" // Apply the styling class
+          className="prose-content"
           dangerouslySetInnerHTML={{ __html: post.content }}
         />
       ) : (
         <p>This post does not have any content yet.</p>
       )}
 
-      {/* SECURITY WARNING: Using dangerouslySetInnerHTML */}
-      {/* This is necessary because you specified storing HTML directly in Supabase. */}
-      {/* BE EXTREMELY CAREFUL about the source of this HTML. Ensure that */}
-      {/* only trusted administrators (like Rahul Gupta) can insert/edit */}
-      {/* the HTML content in the Supabase table. Malicious HTML/JavaScript */}
-      {/* inserted here could lead to Cross-Site Scripting (XSS) attacks. */}
-      {/* Consider using Markdown and a parser (like 'react-markdown') instead */}
-      {/* if security is a major concern or if non-technical users will add content. */}
+      {/* SECURITY WARNING REMAINS VALID */}
+      {/* Ensure only trusted admins can insert HTML content */}
     </article>
   );
 }
-
-// Optional: Add loading and error UI
-// Create src/app/blog/[slug]/loading.tsx
-// Create src/app/blog/[slug]/error.tsx
