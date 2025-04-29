@@ -4,13 +4,6 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image"; // Import next/image
 
-// REMOVE THIS INTERFACE
-// interface PostPageProps {
-//   params: {
-//     slug: string;
-//   };
-// }
-
 // Define the type for a single Post with content
 interface FullPost {
   id: number;
@@ -91,7 +84,6 @@ export default async function PostPage({
       {/* Use next/image component - ADDRESSING THE WARNING */}
       {post.image_url && (
         <div className="relative w-full h-96 mb-6 shadow rounded-lg overflow-hidden">
-          {" "}
           {/* Container for layout */}
           <Image
             src={post.image_url}
