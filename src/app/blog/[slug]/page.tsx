@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Metadata } from "next"; // Import Metadata type
 
+export const revalidate = 0;
+
 interface FullPost {
   id: number;
   title: string;
