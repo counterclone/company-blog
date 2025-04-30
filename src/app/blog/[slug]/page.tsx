@@ -47,12 +47,8 @@ export async function generateMetadata({
   };
 }
 
-// --- PAGE COMPONENT ---
-interface PageProps {
-  params: { slug: string };
-}
-
-export default async function PostPage({ params }: PageProps) {
+// ✅ --- PAGE COMPONENT ---
+export default async function Page({ params }: { params: { slug: string } }) {
   const post = await getPostBySlug(params.slug);
 
   if (!post) {
