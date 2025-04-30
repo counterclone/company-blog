@@ -1,7 +1,7 @@
 // src/app/page.tsx
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient"; // Import Supabase client
-
+export const revalidate = 0;
 // Define the type for a Post
 interface Post {
   id: number;
