@@ -36,7 +36,7 @@ async function getPostBySlug(slug: string): Promise<FullPost | null> {
 export async function generateMetadata({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   // Explicitly type the return value as Metadata
   // Await params as it might be a Promise in newer Next.js versions
