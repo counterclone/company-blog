@@ -1,6 +1,7 @@
 import { supabase } from "@/lib/supabaseClient";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { Metadata } from "next"; // Import Metadata type
 
 interface FullPost {
   id: number;
@@ -24,6 +25,7 @@ async function getPostBySlug(slug: string): Promise<FullPost | null> {
       return null;
     }
     console.error("Error fetching post by slug:", error);
+    // Consider a more graceful error handling in production
     throw new Error(`Failed to fetch post: ${error.message}`);
   }
 
@@ -35,8 +37,12 @@ export async function generateMetadata({
   params,
 }: {
   params: { slug: string };
-}) {
-  const post = await getPostBySlug(params.slug);
+}): Promise<Metadata> {
+  // Explicitly type the return value as Metadata
+  // Await params as it might be a Promise in newer Next.js versions
+  const awaitedParams = await params;
+  const post = await getPostBySlug(awaitedParams.slug);
+
   if (!post) {
     return {
       title: "Post Not Found",
@@ -48,8 +54,15 @@ export async function generateMetadata({
 }
 
 // ✅ --- PAGE COMPONENT ---
-export default async function Page({ params }: { params: { slug: string } }) {
-  const post = await getPostBySlug(params.slug);
+// Update the type definition for params to be a Promise
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  // Await params inside the component as well
+  const awaitedParams = await params;
+  const post = await getPostBySlug(awaitedParams.slug);
 
   if (!post) {
     notFound();
